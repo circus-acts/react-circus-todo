@@ -1,0 +1,75 @@
+exports[`view should render a selected filter 1`] = `
+<li>
+  <a
+    className="selected"
+    onClick={[Function]}>
+    All
+  </a>
+</li>
+`;
+
+exports[`view should render a todo 1`] = `
+<li
+  className={false}>
+  <div
+    className="view">
+    <input
+      checked={false}
+      className="toggle"
+      onChange={undefined}
+      type="checkbox" />
+    <label
+      onDoubleClick={undefined}>
+      item 1
+    </label>
+    <button
+      className="destroy"
+      onClick={undefined}
+      type="checkbox" />
+  </div>
+</li>
+`;
+
+exports[`view should render a todo for editing 1`] = `
+<input
+  autoFocus={true}
+  className="edit"
+  defaultValue="item 1"
+  onBlur={undefined}
+  onKeyUp={undefined} />
+`;
+
+exports[`view should render a view 1`] = `
+<div
+  className="todoapp">
+  <div
+    className="header">
+    <h1>
+      todos
+    </h1>
+    <input
+      className="new-todo"
+      onKeyUp={[Function]}
+      placeholder="What needs to be done?" />
+  </div>
+  <section
+    className="main">
+    <input
+      className="toggle-all"
+      onClick={[Function]}
+      type="checkbox" />
+    <ul
+      className="todo-list" />
+  </section>
+</div>
+`;
+
+exports[`view should render an un-selected filter 1`] = `
+<li>
+  <a
+    className=""
+    onClick={[Function]}>
+    All
+  </a>
+</li>
+`;
