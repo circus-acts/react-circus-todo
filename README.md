@@ -60,7 +60,7 @@ If [circuit-js](https://github.com/circus-acts/circuit-js) is new to you, you'll
 * Circuits, channels and join points are all [signals](https://github.com/circus-acts/circuit-js/signals).
 * Signals *signal* changes in state to any functions connected to them.
 
-So, for example, a new item pushed on to the **add** channel will be merged with the current list of todos and propagated through the circuit. Because the circuit is a signal itself, any functions connected at this level (a view?) will be signalled with the new circuit value.
+So, for example, a new item pushed on to the **add** channel will be merged with the current list of todos and propagated through the circuit. Because the circuit is also a signal, any functions connected at this level (a view?) will be signalled with the latest circuit value which includes the new item.
 
 ### Testing
 Circuits are functional units and they can be tested in isolation. This is particularly powerful when circuits become more complex - there are many exotic join points that control circuit propagation in lots of interesting ways.
@@ -205,7 +205,7 @@ export default actions = {
 
 ### Putting it all together - the App
 
-Circuits propagate values to functions. By lifting the view into the circuit, the view will receive circuit values whenever any of the values are signalled.
+Circuits propagate values to functions. By lifting the view into the circuit, the view will receive circuit values whenever any of the channels are signalled.
 
 ```javascript
 //index.js
@@ -213,12 +213,12 @@ import { render } from 'react-dom'
 import circuit from './circuit'
 import view from './view.jsx'
 
-circuit.tap(data =>
-  render(view(data), document.querySelector('#todo'))
-)
+const app = component => render(component, document.querySelector('#todo'))
+
+circuit.map(view).tap(app)
 ```
 
-But hey! Circuits are signals and signals are lazy. This circuit is waiting to be signalled. This might be an asynchronous message from the server or a route change or it might be something as simple as a nudge - in this case by setting the initial state...
+But hey! Circuits are signals and signals are lazy. This circuit is waiting for its first signal. This might be an asynchronous message from the server or a route change or it might be something as simple as a nudge - in this case by setting the initial state...
 
 ```javascript
 //index.js
