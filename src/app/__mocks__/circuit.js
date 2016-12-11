@@ -1,4 +1,4 @@
-import {utils} from 'circuuit-js'
+import {utils} from 'circuit-js'
 
 const circuit = require.requireActual('../circuit').default
 

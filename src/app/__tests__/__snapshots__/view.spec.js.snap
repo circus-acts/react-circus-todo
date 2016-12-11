@@ -48,6 +48,7 @@ exports[`view should render a view 1`] = `
       todos
     </h1>
     <input
+      autoFocus={true}
       className="new-todo"
       onKeyUp={[Function]}
       placeholder="What needs to be done?" />

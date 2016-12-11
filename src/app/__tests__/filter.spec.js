@@ -29,4 +29,8 @@ describe('filters', () => {
         expect(filter(data).total).toBe(2)
     })
 
+    it('should handle empty list', () => {
+        expect(filter({todos: []}).remaining).toBe(0)
+        expect(filter({todos: []}).total).toBe(0)
+    })
 })

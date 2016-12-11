@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Circuit-js / React todo example",
   "scripts": {
+    "build": "webpack --config webpack.config.js",
     "start": "webpack-dev-server --content-base build/",
     "test": "jest"
   },

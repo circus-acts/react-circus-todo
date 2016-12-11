@@ -18,6 +18,6 @@ export default channels => {
       }
     }),
     total: todos.length,
-    remaining: todos.reduce((r, todo) => r + todo.completed? 1 : 0)
+    remaining: todos.reduce((r, todo) => r + (todo.completed? 0 : 1), 0)
   }
 }
