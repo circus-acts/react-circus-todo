@@ -22,7 +22,7 @@ Go to `localhost:8080`
 
 An application uses the circuit-js API to define a circuit, a signal based representation of an application's actions and values and how they relate to one another over time.
 
-The basic idea, and this example is using circuits at a *very* basic level, is to propagate different values to different functions using a declarative syntax. The great thing about this is that we can say quite a lot about the shape of an application without having to define any of its functional behaviour. This leads to a very clean separation of concerns.
+The basic idea, and this example is using circuits at a *very* basic level, is to propagate different values to different functions through a declarative syntax. The great thing about this is that we can say quite a lot about the shape of an application without having to define any of its functional behaviour. This leads to a very clean separation of concerns.
 
 The following circuit captures the essential shape of a TODO app in terms of its actions and values:
 
@@ -54,18 +54,18 @@ If [circuit-js](https://github.com/circus-acts/circuit-js) is new to you, you'll
 
 * Circuits are constructed using standard object syntax.
 * Key values (remember `{add}` is really `{add: add}`) define channels and join points.
-* **add** is a channel. Channels introduce new values into the circuit.
-* **todos** is a join point. Join points control how values propagate through the circuit.
-* In [merge](https://github.com/circus-acts/circuit-js/merge) type join points, incoming channel values replace the current join point value.
-* Circuits, channels and join points are all [signals](https://github.com/circus-acts/circuit-js/signals).
-* Signals *signal* changes in state to any functions connected to them.
+* **add** is a channel. Channels introduce new values into the circuit through signals.
+* **todos** is a join point. Join points control how signals propagate through the circuit.
+* In [merge](https://github.com/circus-acts/circuit-js/merge) type join points, incoming signal values replace the current join point value.
+* Circuits, channels and join points can all be [signalled](https://github.com/circus-acts/circuit-js/doc/signals.md).
+* Functions are lifted into signal propagation through channel operators.
 
-So, for example, a new item pushed on to the **add** channel will be merged with the current list of todos and propagated through the circuit. Because the circuit is also a signal, any functions connected at this level (a view?) will be signalled with the latest circuit value which includes the new item.
+So, for example, a new item signalled on the **add** channel will be merged with the current list of todos and propagated through the circuit. Because the circuit is also a channel, any functions connected at this level (a view?) will be signalled with the latest circuit value which includes the new item.
 
 ### Testing
 Circuits are functional units and they can be tested in isolation. This is particularly powerful when circuits become more complex - there are many exotic join points that control circuit propagation in lots of interesting ways.
 
-But this circuit isn't quite ready to be tested. A small but annoying downside to standard object syntax, at least from our immediate point of view, is that all object references need to be defined. They need to be imported:
+But this circuit isn't quite ready to be tested. A small but annoying downside to standard object syntax, at least from our immediate point of view, is that all object references need to be defined. They can be imported:
 
 ```javascript
 // circuit.js
@@ -80,30 +80,35 @@ Now the circuit can be tested:
 import circuit from '../circuit'
 import {ACTIVE} from '../filter'
 
-const {channels} = circuit
+const {signals} = circuit
 
 describe('circuit', () => {
   it('should add a new todo', () => {
-     channels.todos.add('a new todo')
+     signals.todos.add('a new todo')
      expect(circuit.value().todos).toEqual('a new todo')
   })
 
   it('should set a filter constant', () => {
-     channels.filterBy.ACTIVE()
+     signals.filterBy.ACTIVE()
      expect(circuit.value().filterBy).toEqual(ACTIVE)
   })
 })
 
 ```
 
-With the circuit defined, how does this impact on the rest of the application? It minimises boilerplate.
+With the circuit defined, how does this impact on the rest of the application? It minimises boilerplate by removing the need to explicitly declare state or action types without sacrificing the identity of either.
+
+* State is held by the circuit through its channels and does not need to be explicitly defined.
+* State is accessed by tapping into the circuit at various points. No extraneous mapping is needed.
+* Actions *do* exist, but usually as simple signal bindings.
+* Signal propagation is the single mechanism responsible for setting circuit state and reacting to it.
 
 ### Circuit functions
-The channels exposed by the circuit are signals. A signal is a mechanism that accepts a value and (optionally) delivers it to a function. Ie, it *signals* the value to the function. The function arguments will depend on the [signal context](signal.context), and this will depend on how the signal is bound to the circuit.
+The channels exposed by the circuit can be signalled. A signal is a propagation mechanism that accepts a value and (optionally) delivers it to a function. Ie, it *signals* the value to the function. The function arguments will depend on the [signal context](signal.context), and this will depend on how the signal is bound to the circuit.
 
 When a signal is added to a merge join point, circuit-js binds it to a reducing context. This context allows the signal to deliver both the join point value and the channel value together. Any function lifted into the signal will receive both of these values. The value returned by the function will replace the join point value.
 
-The add function looks like this...
+The add function adheres to this pattern looks like this...
 
 ```javascript
 // reducers.js
@@ -115,32 +120,10 @@ export const add = (todos, description) => todos.concat({
 })
 ```
 
-...and it returns a new, amended todo list. This function is very easy to test.
+It returns a new and amended todo list. This function is very easy to test.
 
-The same pattern applies to all of the other reducer functions:
-```javascript
-...
+The same pattern applies to all of the [other reducer functions]() including the filters.
 
-export const update = (todos, {id, value}) => todos.map(todo => {
-  return todo.id !== id? todo : {...todo, description: value }
-})
-
-export const complete = (todos, {id, value}) => todos.map(todo => {
-  return todo.id !== id? todo : {...todo, completed: value }
-})
-
-export const remove = (todos, id) => todos.filter(todo => todo.id !== id)
-
-export const purge = todos => todos.filter(todo => !todo.completed)
-
-export const toggle = completed => todos => {
-  completed = !completed
-  return todos.map(todo => ({...todo, completed}))
-}(false)
-```
-All of these reducer functions are just that - pure JavaScript functions. They are made special by lifting them into signals, which in this simple example happens when the circuit function is called with an object that directly references the reducer functions. In more advanced circuits, functions can be lifted into signals and these in turn lifted into the circuit. Circuits are composable.
-
-### Filters
 The filter channels are also merged, and therefore also reducers. But the interesting aspect here is that CONSTANTS rather than functions are lifted into the channel signals. No further work is required:
 
 ```javascript
@@ -157,19 +140,11 @@ The view in this application is a set of React components. Its purpose, from a f
 
 * The circuit propagates values through to the view.
 * The view signals user input events on circuit channels.
-* The channels signal the reducer functions of circuit changes.
-* The reducers return new values to the circuit...
+* The signalled values propagate to the reducer functions.
+* The reducers return new values to the circuit
+* The circuit propagates...
 
-A schematic diagram might help here.  **v1** and **v2** are input event values signalled on the **add** channel at arbitrary points in time. The direction of value propagation is towards the circuit:
-```
-PROPAGATION
-| SIGNALS   TIMELINE ->
-| add:      ------------v1----------------v2---------------------->
-| todos:    []-----------[v1]--------------[v1, v2]--------------->
-V circuit:  {todos: []}---{todos: [v1]}-----{todos: [v1, v2]}----->
-```
-
-The main view component will receive its props directly from the circuit and user input events are wired up to circuit channels:
+The main view component will receive its props directly from the circuit and user input events are wired up to circuit channels through a set of imported helper functions called actions.
 
 ```javascript
 // view.js
@@ -183,19 +158,14 @@ export default props => (<div>
 </div>)
 ```
 
-To reduce clutter, all of the event handlers required to wire up the view are defined in helper module called [actions.js](/src/app/actions.js).
-
-A typical channel binding:
+Actions simply reduce code clutter by abstracting the bindings required to connect input events to signals. the `actions.add` binding above is defined in the [actions.js]() module as (simplified here):
 
 ```javascript
 // actions.js
 import circuit from './circuit'
 
-const {todos} = circuit.channels
-
-const fromEvent = channel => ({target}) => {
-  channel(target.value)
-}
+const {todos} = circuit.signals
+const fromEvent = signal => ({target}) => signal(target.value)
 
 export default actions = {
   add: fromEvent(todos.add),
@@ -218,23 +188,25 @@ const app = component => render(component, document.querySelector('#todo'))
 circuit.map(view).tap(app)
 ```
 
-But hey! Circuits are signals and signals are lazy. This circuit is waiting for its first signal. This might be an asynchronous message from the server or a route change or it might be something as simple as a nudge - in this case by setting the initial state...
+But hey! Circuits are channels and channels are lazy. This circuit is waiting for its first signal. This might be an asynchronous message from the server or a route change or it might be something as simple as a nudge - in this case by signalling the initial state...
 
 ```javascript
 //index.js
 ...
 
-circuit.input({todos: []})
+circuit.signal({todos: []})
 ```
 
-The circuit is complete and now it's active.
+The circuit is complete and now that it has been signalled - it's active.
 
 # Summary
 
-* The defining module in the TODO app is the circuit - it defines the shape of the app in terms of channels and join points.
+* The architectural module in the TODO app is the circuit.
+* The circuit defines the shape of the app in terms of channels and join points.
+* It holds the state of the app and determines state changes through signalling.
 * Reducer functions are lifted into the circuit's routing channels.
 * The primary view is lifted into the circuit's outer channel.
-* User events are wired up to channel inputs.
+* User events are wired up to channel signals.
 * the whole thing is kick-started by signalling the circuit.
 
 

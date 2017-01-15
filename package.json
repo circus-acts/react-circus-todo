@@ -7,8 +7,14 @@
     "start": "webpack-dev-server --content-base build/",
     "test": "jest"
   },
+  "author": "philtoms",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url" : "http://github.com/circus-acts/react-circuit-todo.git"
+  },
   "dependencies": {
-    "circuit-js": "^0.0.3-alpha",
+    "circuit-js": "^0.0.2-alpha",
     "react": "15.3.2",
     "react-dom": "15.3.2",
     "shortid": "^2.2.6",
@@ -28,7 +34,5 @@
     "style-loader": "^0.13.1",
     "webpack": "1.12.13",
     "webpack-dev-server": "1.14.1"
-  },
-  "author": "philtoms",
-  "license": "ISC"
+  }
 }

@@ -3,7 +3,7 @@ import Circuit from 'circuit-js'
 import {add, update, complete, remove, purge, toggle} from './reducers'
 import filterBy, {ALL, ACTIVE, COMPLETED} from './filters'
 
-const {circuit, merge, signal} = new Circuit()
+const {circuit, merge, channel} = new Circuit()
 
 export default circuit({
 
@@ -20,6 +20,6 @@ export default circuit({
     ACTIVE,
     COMPLETED
   }),
-  editing: signal().pulse()
+  editing: channel().pulse()
 
 }).map(filterBy)

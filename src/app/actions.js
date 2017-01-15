@@ -1,23 +1,23 @@
-// The actions defined here simply push event values into circuit channels.
+// The actions defined here simply push event values into circuit signals.
 
 import circuit from './circuit'
-const {filterBy, editing, todos} = circuit.channels
+const {filterBy, editing, todos} = circuit.signals
 
-// Create a helper function to get event value by type and push it into a channel.
-const fromEvent = (channel, id) => ({keyCode, type, target}) => {
+// Create a helper function to get event value by type and push it into a signal.
+const fromEvent = (signal, id) => ({keyCode, type, target}) => {
   if (keyCode === 13 || type === 'blur' || target.type === 'checkbox') {
     const value = target[target.type === 'checkbox' ? 'checked' : 'value']
     if (id === 'add') {
-      channel(value)
+      signal(value)
       target.value = ''
     }
-    else channel({id, value})
+    else signal({id, value})
   }
 }
 
 const actions = {
   add: fromEvent(todos.add, 'add'),
-  // the following channels are wrapped in a binding identity
+  // the following signals are wrapped in a binding identity
   bind: id => ({
     update: fromEvent(todos.update, id),
     complete: fromEvent(todos.complete, id),
@@ -25,7 +25,7 @@ const actions = {
     edit: () => editing(id)
   }),
 
-  // pass these channels through unchanged - just for convenience really
+  // pass these signals through unchanged - just for convenience really
   purge: todos.purge,
   toggle: todos.toggle,
   ALL: filterBy.ALL,

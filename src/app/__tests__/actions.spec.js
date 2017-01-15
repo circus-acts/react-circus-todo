@@ -3,11 +3,11 @@ jest.mock('../circuit')
 import circuit from '../circuit'
 import actions from '../actions'
 
-const {filterBy, todos} = circuit.channels
+const {filterBy, todos} = circuit.signals
 
 describe('actions', () => {
 
-    it('should expose channels - filters', () => {
+    it('should expose channel signals - filters', () => {
         expect(actions.ALL).toBe(filterBy.ALL)
         expect(actions.ACTIVE).toBe(filterBy.ACTIVE)
         expect(actions.COMPLETED).toBe(filterBy.COMPLETED)

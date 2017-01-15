@@ -1,7 +1,7 @@
 import {generate} from 'shortid'
 
-// The circuit reducing pattern merges incoming signal channels into an outgoing
-// reducing channel: A, B -> A
+// The circuit reducing pattern merges incoming signal value into an outgoing
+// reducing signal: A, B -> A
 
 export const add = (todos, description) => todos.concat({
   id: generate(),
