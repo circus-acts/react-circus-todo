@@ -4,7 +4,7 @@
   "description": "Circuit-js / React todo example",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server --content-base build/",
+    "start": "webpack-dev-server --inline --history-api-fallback --content-base build/",
     "test": "jest"
   },
   "author": "philtoms",

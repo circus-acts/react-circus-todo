@@ -1,4 +1,5 @@
 import React from 'react'
+import {replace} from './router'
 
 // User actions are bound to the circuit input channels through a set of helper functions.
 import actions from './actions'
@@ -33,9 +34,13 @@ export const Todo = ({editing, data, actions}) => {
 }
 
 const cap = str => str[0] + str.substr(1).toLowerCase()
+const to = e => {
+  e.preventDefault()
+  replace(e.target.href.toLowerCase())
+}
 
 export const Filter = ({by, filterBy}) => (
-  <li><a className={filterBy===by ? 'selected' : ''} onClick={actions[by]}>{cap(by)}</a></li>
+  <li><a className={filterBy===by ? 'selected' : ''} href={by} onClick={to}>{cap(by)}</a></li>
 )
 
 // The main view will receive its props directly from the circuit.

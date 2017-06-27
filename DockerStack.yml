@@ -1,0 +1,8 @@
+web:
+  image: philtoms/circuit-todo
+  links:
+    - web
+  ports:
+    - "80:80"
+  roles:
+    - global
